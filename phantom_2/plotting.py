@@ -3,7 +3,33 @@ from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 from matplotlib.animation import FuncAnimation
 
 def gif_plot(ds_read, tracked_blobs, gif_fps, density_threshold, tolerance_factor, detection_method, distance_threshold, save_path="mygif.gif"):
-    
+    """
+    Generate and save an animated GIF visualizing blob tracking over time.
+
+    Parameters
+    ----------
+    ds_read : Dataset
+        Dataset object containing simulation or experimental data, including domain size and time series frames.
+    tracked_blobs : list of TrackedBlob
+        List of tracked blobs with their contour coordinates and metadata.
+    gif_fps : int
+        Frames per second for the output GIF animation.
+    density_threshold : float
+        Density threshold used in the blob detection method (for display in the title).
+    tolerance_factor : float
+        Tolerance factor used in the blob detection method (for display in the title).
+    detection_method : str
+        Name of the blob detection method used (for display in the title).
+    distance_threshold : float
+        Distance threshold used in certain detection methods (for display in the title).
+    save_path : str, optional
+        Path to save the generated GIF. Default is "mygif.gif".
+
+    Returns
+    -------
+    None
+        Displays the animation and saves it as a GIF file.
+    """
     assert len(tracked_blobs) > 0
     assert gif_fps > 0
     
@@ -99,7 +125,29 @@ def gif_plot(ds_read, tracked_blobs, gif_fps, density_threshold, tolerance_facto
 import math
 
 def scatter_plot(tracked_blobs, density_threshold, tolerance_factor, detection_method, distance_threshold, domain):
-    
+    """
+    Plot the spatial trajectories of all tracked blobs as a scatter plot.
+
+    Parameters
+    ----------
+    tracked_blobs : list of TrackedBlob
+        List of tracked blobs containing their centers of mass over time.
+    density_threshold : float
+        Density threshold used in the blob detection method (for display in the title).
+    tolerance_factor : float
+        Tolerance factor used in the blob detection method (for display in the title).
+    detection_method : str
+        Name of the blob detection method used (for display in the title).
+    distance_threshold : float
+        Distance threshold used in certain detection methods (for display in the title).
+    domain : Domain
+        Domain object containing spatial dimensions Lx and Ly.
+
+    Returns
+    -------
+    None
+        Displays the scatter plot.
+    """
     assert len(tracked_blobs) > 0
     n_blobs = len(tracked_blobs)
 
@@ -145,7 +193,32 @@ import networkx as nx
 from networkx.drawing.nx_agraph import graphviz_layout
 
 def DAG_plot(tracked_blobs, density_threshold, tolerance_factor, detection_method, distance_threshold, save_path=None, ):
-    
+    """
+    Plot the Directed Acyclic Graph (DAG) of blob lineage relationships.
+
+    Each node represents a tracked blob, and edges represent parent–child relationships
+    (splits and merges between blobs across time steps).
+
+    Parameters
+    ----------
+    tracked_blobs : list of TrackedBlob
+        List of tracked blobs containing their IDs and parent relationships.
+    density_threshold : float
+        Density threshold used in the blob detection method (for display in the title).
+    tolerance_factor : float
+        Tolerance factor used in the blob detection method (for display in the title).
+    detection_method : str
+        Name of the blob detection method used (for display in the title).
+    distance_threshold : float
+        Distance threshold used in certain detection methods (for display in the title).
+    save_path : str, optional
+        File path to save the DAG plot as an image. If None, only displays the plot.
+
+    Returns
+    -------
+    None
+        Displays the DAG plot and optionally saves it as an image.
+    """
     assert len(tracked_blobs) > 0
     G = nx.DiGraph()
     # Nodes and edges adding
@@ -196,53 +269,51 @@ def DAG_plot(tracked_blobs, density_threshold, tolerance_factor, detection_metho
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------  
   
 def personalized_title_with_method(detection_method, density_threshold, tolerance_factor, distance_threshold):
+    """
+    Create a descriptive plot title based on the detection method and its parameters.
+
+    Parameters
+    ----------
+    detection_method : str
+        Name of the blob detection method used.
+    density_threshold : float
+        Density threshold parameter used in the method.
+    tolerance_factor : float
+        Tolerance factor parameter (if applicable).
+    distance_threshold : float
+        Distance threshold parameter (if applicable).
+
+    Returns
+    -------
+    str
+        A formatted string suitable for use as a Matplotlib plot title.
+    """
     name = detection_method.replace(' ', r'\ ')
     if detection_method == "arbitrary distance threshold":
         return f"(dens_thresh={density_threshold} ; dist_thresh={distance_threshold})\nDetection method: $\\it{{{name}}}$"
     else:
         return f"(dens_thresh={density_threshold} ; tol_factor={tolerance_factor})\nDetection method: $\\it{{{name}}}$"  
+
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-  
-    
-  
-    
-  
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
