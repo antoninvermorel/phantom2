@@ -1,7 +1,3 @@
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
- 
 from .tracked_blobs import TrackedBlob
 from .blobs import Blob
 from .detection_methods import get_detection_method
@@ -11,34 +7,44 @@ from scipy.optimize import linear_sum_assignment
 
 def update_tracked_blobs(tracked_blobs, phantom_frame, all_times_seen, density_threshold, tolerance_factor, domain, detection_method, distance_threshold):
     """
-   Update the tracked blobs xarray.DataArray with the new frame data by associating new-detected blobs with different maethods including the hungarian algorithm 
-   (centers of mass distance critera)
+    Update the list of tracked blobs with new frame data, associating newly detected blobs 
+    to existing tracked blobs using various methods, including the Hungarian algorithm 
+    (center-of-mass distance criterion).
 
     Parameters
     ----------
-    tracked_blobs : list
-        List of tracked blobs objects (with TrackedBlob class)
+    tracked_blobs : list of TrackedBlob
+        List of currently tracked blob objects.
     phantom_frame : xr.DataArray
-        List of the frame pixels density
+        2D array of density values for the current frame.
     all_times_seen : list of float
-        list of time values for each GIF frame already seen until the current frame
+        List of time values corresponding to all frames processed so far (including the current one).
     density_threshold : float
-        Iso_values threshold for contours detection
+        Threshold value used for contour detection (iso-density value).
     tolerance_factor : float
-        Tolerance factor for blob position estimation
+        Factor controlling tolerance for position matching.
     domain : Domain
-        object from the class domain with domain-size attributes 
-    detection_method : string
-        Name of the traking detection method to use
+        Domain object containing spatial extent and resolution attributes.
+    detection_method : str
+        Name of the blob-tracking detection method to use.
     distance_threshold : float
-        Arbitrary distance threshold for the arbitrary distance threshold method
-        
+        Fixed distance threshold used when the "arbitrary distance threshold" method is selected.
+
     Returns
     -------
-    tracked_blobs : list
-        Updated blob tracking list with the new data
-        
-    """   
+    tracked_blobs : list of TrackedBlob
+        Updated list of tracked blobs, including merged/split/newly appeared/disappeared blobs.
+
+    Raises
+    ------
+    ValueError
+        If `detection_method` is "arbitrary distance threshold" and `distance_threshold` is not strictly positive.
+
+    Notes
+    -----
+    - The association step uses the Hungarian algorithm (scipy.optimize.linear_sum_assignment) 
+      to minimize the total distance between parent blobs and child blobs.
+    """
     if detection_method == "arbitrary distance threshold" and (distance_threshold is None or distance_threshold <= 0):
         raise ValueError(f"You have to put a strictly positive value of distance_threshold in argument for the {detection_method} method.")
         
@@ -134,6 +140,29 @@ def update_tracked_blobs(tracked_blobs, phantom_frame, all_times_seen, density_t
 from skimage import measure
 
 def find_blobs(phantom_frame, density_threshold, domain):
+    """
+    Detect all blobs in a frame based on a given density threshold.
+
+    Parameters
+    ----------
+    phantom_frame : xr.DataArray
+        2D array of density values for the current frame.
+    density_threshold : float
+        Iso-density threshold for contour extraction.
+    domain : Domain
+        Domain object containing spatial extent and resolution attributes.
+
+    Returns
+    -------
+    child_blobs : list of Blob
+        List of Blob objects detected in the current frame.
+
+    Notes
+    -----
+    - Contours are extracted using skimage.measure.find_contours.
+    - Each contour is passed to `refining_blob()` for possible subdivision 
+      into smaller blobs if convexity deficiency is high.
+    """
     child_blobs = []
     contours_list = measure.find_contours(phantom_frame.values, density_threshold)
     for contour in contours_list:
@@ -144,7 +173,31 @@ def find_blobs(phantom_frame, density_threshold, domain):
     
 def refining_blob(contour, phantom_frame, density_threshold, domain, original_contour_data=None):
     """
-    Refine one blob (given by its contour) into sub-blobs recursively if its convexity deficiency is too high.
+    Recursively refine a detected blob's contour into smaller blobs if its convexity 
+    deficiency exceeds a threshold.
+
+    Parameters
+    ----------
+    contour : ndarray
+        Nx2 array of (row, column) coordinates for the blob's contour.
+    phantom_frame : xr.DataArray
+        Local density data for the current frame or sub-region.
+    density_threshold : float
+        Iso-density threshold used for the current contour detection.
+    domain : Domain
+        Domain object containing spatial extent and resolution attributes.
+    original_contour_data : dict, optional
+        Data associated with the original contour (before refinement), if any.
+
+    Returns
+    -------
+    detected_single_blobs : list of Blob
+        List of final Blob objects resulting from the refinement.
+
+    Notes
+    -----
+    - If convexity deficiency is low or threshold is close to the blob's max density, 
+      the blob is accepted without further subdivision.
     """
     contour_coords = np.column_stack((contour[:, 1] * domain.dx, contour[:, 0] * domain.dy))
     
@@ -165,19 +218,6 @@ def refining_blob(contour, phantom_frame, density_threshold, domain, original_co
         sub_blobs.extend(refining_blob(sub_contour, blob.local_density_array, higher_threshold, domain, original_contour_data=blob.original_contour_data))
     return sub_blobs
     
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
