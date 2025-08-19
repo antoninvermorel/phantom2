@@ -5,7 +5,7 @@ import sys
 print(sys.executable)
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from phantom_class import Dataset, update_tracked_blobs, gif_plot, scatter_plot, DAG_plot
+from phantom_2 import Dataset, update_tracked_blobs, gif_plot, scatter_plot, DAG_plot
 
 def main():
     dataset_name = "dataset_phantom_blobmodel_gif.nc"
