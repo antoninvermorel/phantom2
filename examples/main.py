@@ -8,7 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from phantom_class import Dataset, update_tracked_blobs, gif_plot, scatter_plot, DAG_plot
 
 def main():
-    dataset_name = "C:\\Users\\anton\\UiT work\\Python files\\phantom_2.0\\dataset_phantom_blobmodel_gif.nc"
+    dataset_name = "dataset_phantom_blobmodel_gif.nc"
     density_threshold = 0.2
     tolerance_factor = 2.0
     detection_method = "subblobs"  # {"arbitrary distance threshold, "personalized distance threshold", "subblobs"}
