@@ -15,7 +15,7 @@ class Blob:
         Coordinates of the blob contour.
     center_of_mass : np.ndarray or None
         Center of mass of the blob contour.
-    contour_data : dict or None
+    contour_features : dict or None
         Computed properties of the contour such as area, length, and convexity deficiency.
     is_truncated : bool or None
         Indicates if the blob touches/truncates the domain boundaries.
@@ -36,11 +36,12 @@ class Blob:
     """
     
     
-    def __init__(self):
+    def __init__(self, time=None):
         """Initialize a Blob instance with all attributes set to None or default."""
+        self.time = time
         self.contour_coords = None
         self.center_of_mass = None
-        self.contour_data = None
+        self.contour_features = None
         self.is_truncated = None
         self.density_threshold_used = None
         self.max_density = None
@@ -51,7 +52,7 @@ class Blob:
         self.w_perp = None
 
     @classmethod
-    def empty(cls):
+    def empty(cls, time):
         """
         Create an empty Blob instance.
 
@@ -60,10 +61,10 @@ class Blob:
         Blob
             A Blob object with default uninitialized attributes.
         """
-        return cls()
+        return cls(time=time)
         
     @classmethod
-    def from_contour(cls, contour_coords, domain, phantom_frame, density_threshold_used, original_contour_data=None):
+    def from_contour(cls, time, contour_coords, domain, phantom_frame, density_threshold_used, original_contour_data=None):
         """
         Create a Blob instance from contour coordinates and compute derived properties.
 
@@ -85,7 +86,7 @@ class Blob:
         Blob
             A fully initialized Blob object with computed properties.
         """
-        blob = cls()
+        blob = cls(time=time)
         blob.contour_coords = contour_coords
         blob.compute_contour_data()
         blob.compute_is_truncated(domain)
@@ -113,9 +114,9 @@ class Blob:
                 "com": self.center_of_mass,
                 "max_density": self.max_density,
                 "is_truncated": self.is_truncated,
-                "rho_thresh_used": self.density_threshold_used
+                "rho_thresh_used": self.density_threshold_used,
+                "contour_features": self.contour_features
                 }
-        
 
     def compute_contour_data(self):
         """
@@ -132,9 +133,9 @@ class Blob:
         convex_hull = ConvexHull(self.contour_coords)
         cd = abs((convex_hull.volume - polygon.area) / convex_hull.volume)
 
-        self.contour_data = {
+        self.contour_features = {
             "area": polygon.area,
-            "length": polygon.length,
+            "contour_length": polygon.length,
             "convexity_deficiency": cd,
         }
         self.center_of_mass = np.array([polygon.centroid.x, polygon.centroid.y])
@@ -204,6 +205,76 @@ class Blob:
             self.max_density = None
         else:
             self.max_density = phantom_frame.values.max()
+
+
+
+    def get_observation(self, features, use_original_contour=False):
+        """
+        Construct the observation vector for Kalman filtering based on the blob's properties.
+    
+        Parameters
+        ----------
+        features : list of str
+            List of contour feature names to include in the observation vector
+            (e.g., 'area', 'length', 'convexity_deficiency').
+        use_original_contour : bool, optional
+            If True, use the original contour data stored in `original_contour_data`
+            instead of the current contour attributes. Default is False.
+    
+        Returns
+        -------
+        np.ndarray, shape (n_features+2, 1)
+            Observation vector containing:
+            - x-coordinate of center of mass
+            - y-coordinate of center of mass
+            - values of the requested contour features in the order specified by `features`
+    
+        Raises
+        ------
+        ValueError
+            - If 'self.contour_coords' is None (empty blob)
+            - If a feature of 'features' is not valid
+        """
+        # handle empty blob 
+        if self.contour_coords is None:
+            return None
+        
+        # handle invalid features
+        allowed_features = {"area", "convexity_deficiency", "contour_length"}
+        for feature in features:
+           if feature not in allowed_features:
+               raise ValueError(
+                        f"'features' requires features in {allowed_features}, "
+                        f"got {features}.")
+        
+        # filling in observation vector
+        if not use_original_contour:
+            obs = [self.center_of_mass[0], self.center_of_mass[1]]
+            for feat_name in features:
+                val = self.contour_features.get(feat_name, None)
+                if val is None:
+                    raise ValueError(f"Blob doesn't contain the attribute : '{feat_name}'")
+                obs.append(val)
+        else:
+            obs = [self.original_contour_data["com"][0], self.original_contour_data["com"][1]]
+            for feat_name in features:
+                val = self.original_contour_data["contour_features"].get(feat_name, None)
+                if val is None:
+                    raise ValueError(f"Blob doesn't contain the attribute : '{feat_name}'")
+                obs.append(val)
+            
+        return np.array(obs).reshape(-1, 1)
+
+
+
+
+
+
+
+
+
+
+
 
 
 

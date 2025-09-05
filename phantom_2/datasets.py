@@ -59,6 +59,7 @@ class Dataset:
     def __init__(self, dataset_name):
         """
         Load the dataset from the specified file and initialize domain metadata.
+        The dataset is fully loaded in memory and the file handle is closed.
 
         Parameters
         ----------
@@ -66,7 +67,8 @@ class Dataset:
             Path to the dataset file.
         """
         import xarray as xr
-        self.ds = xr.open_dataset(dataset_name).load()  # charge tout
+        with xr.open_dataset(dataset_name) as ds:
+            self.ds = ds.load()
         self.domain = Domain(self.ds)
         self.times = self.ds.t.values
         self.x = self.ds.x.values
@@ -112,8 +114,36 @@ class Dataset:
         return self.ds.n.isel(t=t_index)
     
     
+    # def get_next_dt(self, t_index):
+    #     """
+    #     Retrieve the next time step from a times list index (used for Kalman computation)
+
+    #     Parameters
+    #     ----------
+    #     t_index : int
+    #         times list index
+
+    #     Returns
+    #     -------
+    #     float
+    #         time step between the time corresponding to the time index and the next time.
+
+    #     """
+    #     if len(self.times) == t_index+1:
+    #         return None
+    #     else:
+    #         return self.times[t_index+1] - self.times[t_index]
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+
     
     
     

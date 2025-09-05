@@ -5,39 +5,83 @@ import sys
 print(sys.executable)
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from phantom_2 import Dataset, update_tracked_blobs, gif_plot, scatter_plot, DAG_plot
+from phantom_2 import Dataset, tracking, gif_plot, scatter_plot, DAG_plot
 
 def main():
-    dataset_name = "dataset_phantom_blobmodel_gif.nc"
-    density_threshold = 0.2
-    tolerance_factor = 2.0
-    detection_method = "subblobs"  # {"arbitrary distance threshold, "personalized distance threshold", "subblobs"}
-    distance_threshold = 0.925
-    gif_fps = 8
-        
-    tracked_blobs = []
-    ds_read = Dataset(dataset_name)
-    domain = ds_read.domain
-    all_times_seen = []
-
-    for u in range(len(ds_read.times)):
-        time = ds_read.times[u]
-        all_times_seen.append(time)
-        phantom_frame = ds_read.get_frame(u)
-        tracked_blobs = update_tracked_blobs(
-            tracked_blobs,
-            phantom_frame,
-            all_times_seen,
-            density_threshold,
-            tolerance_factor,
-            domain,
-            detection_method,
-            distance_threshold
-        )
+    ds_read = Dataset("dataset_phantom_blobmodel_noisy.nc")    
     
-    gif_plot(ds_read, tracked_blobs, gif_fps, density_threshold, tolerance_factor, detection_method, distance_threshold, save_path="phantom_blobs_tracking.gif")
-    DAG_plot(tracked_blobs, density_threshold, tolerance_factor, detection_method, distance_threshold)
-    scatter_plot(tracked_blobs, density_threshold, tolerance_factor, detection_method, distance_threshold, domain) 
-    return tracked_blobs
+    tracking_config = {
+        "density_threshold": 0.2,
+        "assoc_matching_method": "mahalanobis",  # {"euclidean", "mahalanobis"}
+        "interac_matching_method": "euclidean",  # {"euclidean", "mahalanobis"}
+        "interac_detection_method": "subblobs",  # {"simple_gating", "complex_residual_gating", "subblobs"}
+    
+        # Main 1-1 associations subconfig
+        # "assoc_euclidean_features": {
+        #     "dist_thresh_type": "arbitrary",  # {"arbitrary", "individual"}
+        #     "arbitrary_dist_thresh": 2.0,
+        # },
+        "assoc_mahalanobis_features": {
+            "kalman_features": {
+                "features": set(),  # {"area", "convexity_deficiency", "contour_length"} but not giving good results for the moment
+                "model": "CV",
+                "uncertainties": {
+                    "sigma_proc_pos": 1.0,
+                    "sigma_proc_vel": 4.0,
+                    "sigma_proc_acc": 1.5,
+                    "sigma_meas_pos": 0.2,
+                }
+            },
+            "alpha": 0.1  # significance level for chi2 gating test : 0.05, 0.01, etc
+        },
+        
+        # Interractions detection subconfig
+        "interac_euclidean_features": {
+            "dist_thresh_type": "individual",   # {"arbitrary", "individual"}
+            "tolerance_factor": 2.0
+        },
+        # "interac_mahalanobis_features": {
+        #     "kalman_features": {
+        #         "features": set(),  # {"area", "convexity_deficiency", "contour_length"} but not giving good results for the moment
+        #         "model": "CV",
+        #         "uncertainties": {
+        #             "sigma_proc_pos": 1.0,
+        #             "sigma_proc_vel": 4.0,
+        #             "sigma_proc_acc": 1.5,
+        #             "sigma_meas_pos": 0.2,
+        #         }
+        #     }, 
+        #     "alpha": 0.01  # significance level for chi2 gating test : 0.05, 0.01, etc
+        # }
+    }  
+  
+    gif_fps = 5
+    
+    tracked_blobs = tracking(ds_read, tracking_config)
+    
+    gif_plot(ds_read, tracked_blobs, tracking_config, gif_fps=gif_fps, save_path="phantom2_blobs_tracking.gif")
+    DAG_plot(tracked_blobs, tracking_config, save_path="phantom2_DAG.jpeg")
+    scatter_plot(ds_read, tracked_blobs, tracking_config, save_path="phantom2_scatter.jpeg")
 
 main()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
