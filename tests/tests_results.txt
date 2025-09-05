@@ -1,0 +1,381 @@
+#%% Tests results with the simulation of the file 'blobmodel_used_for_tests.py' (resolution 200x200, dt=0.1, no noise) :
+    
+# Associations matching methods :
+    # {euclidean, arbitrary} -> arbitrary_dist_thresh : 
+"""
+        tracking_config = {
+            "density_threshold": 0.2,
+            "assoc_matching_method": "euclidean",
+            "interac_matching_method": "euclidean",
+            "interac_detection_method": "subblobs",
+                
+            # 1-1 associations subconfig
+            "assoc_euclidean_features": {
+                "dist_thresh_type": "arbitrary",
+                "arbitrary_dist_thresh": range(0.0, 5.0, 0.05),
+            },
+            
+            # Interractions detection subconfig
+            "interac_euclidean_features": {  
+                "dist_thresh_type": "individual",
+                "tolerance_factor": 2.6  # giving ideal result
+            },
+        }  
+        
+        -> valid_arbitrary_dist_thresh_intervals = {[0.3, 3.45]}
+"""
+    # {euclidean, individual} -> tolerance_factor :
+"""
+        tracking_config = {
+            "density_threshold": 0.2,
+            "assoc_matching_method": "euclidean",
+            "interac_matching_method": "euclidean",
+            "interac_detection_method": "subblobs",
+                
+            # 1-1 associations subconfig
+            "assoc_euclidean_features": {
+                "dist_thresh_type": "individual",
+                "tolerance_factor": range(1.0, 5.0, 0.1),
+            },
+            
+            # Interractions detection subconfig
+            "interac_euclidean_features": {  
+                "dist_thresh_type": "individual",
+                "tolerance_factor": 2.6  # giving ideal result
+            },
+        }  
+        
+        -> valid_tol_factor_intervals = {[2.5, 5.0]}
+"""
+    # {mahalanobis, CV} -> alpha :
+"""
+        tracking_config = {
+            "density_threshold": 0.2,
+            "assoc_matching_method": "mahalanobis",
+            "interac_matching_method": "euclidean",
+            "interac_detection_method": "subblobs",
+                
+            # 1-1 associations subconfig
+            "assoc_mahalanobis_features": {
+                "kalman_features": {
+                    "features": set(),
+                    "model": "CV",
+                    "uncertainties": {
+                        "sigma_proc_pos": 1.0,
+                        "sigma_proc_vel": 4.0,
+                        "sigma_meas_pos": 0.2,
+                    }
+                },
+                "alpha": range(1.0, 0.0, -0.025),
+            },
+            
+            # Interractions detection subconfig
+            "interac_euclidean_features": {  
+                "dist_thresh_type": "individual",
+                "tolerance_factor": 2.6  # giving ideal result
+            },
+        }  
+        
+        -> valid_alpha_intervals = {[0.975, 0.05]}
+"""
+    # {mahalanobis, CA} -> alpha :
+"""
+        tracking_config = {
+            "density_threshold": 0.2,
+            "assoc_matching_method": "mahalanobis",
+            "interac_matching_method": "euclidean",
+            "interac_detection_method": "subblobs",
+                
+            # 1-1 associations subconfig
+            "assoc_mahalanobis_features": {
+                "kalman_features": {
+                    "features": set(),
+                    "model": "CA",
+                    "uncertainties": {
+                        "sigma_proc_pos": 1.0,
+                        "sigma_proc_vel": 4.0,
+                        "sigma_proc_acc": 1.5,
+                        "sigma_meas_pos": 0.2,
+                    }
+                },
+                "alpha": range(1.0, 0.0, -0.025),
+            },
+            
+            # Interractions detection subconfig
+            "interac_euclidean_features": {  
+                "dist_thresh_type": "individual",
+                "tolerance_factor": 2.6  # giving ideal result
+            },
+        }  
+        
+        -> valid_alpha_intervals = {[0.95, 0.05]}
+"""
+# Interactions matching methods :
+    # {euclidean, arbitrary} -> arbitrary_dist_thresh : 
+        # simple_gating :
+"""
+            tracking_config = {
+                "density_threshold": 0.2,
+                "assoc_matching_method": "euclidean",
+                "interac_matching_method": "euclidean",
+                "interac_detection_method": "simple_gating",
+                    
+                # 1-1 associations subconfig
+                "assoc_euclidean_features": {
+                    "dist_thresh_type": "individual",
+                    "tolerance_factor": 2.6,  # giving ideal result
+                },
+                
+                # Interractions detection subconfig
+                "interac_euclidean_features": {  
+                    "dist_thresh_type": "arbitrary",
+                    "arbitrary_dist_thresh": range(0.0, 5.0, 0.05)
+                },
+            }  
+            
+            -> valid_arbitrary_dist_thresh_intervals = {[0.95, 0.95]}
+"""
+        # complex_residual_gating :
+"""
+            tracking_config = {
+                "density_threshold": 0.2,
+                "assoc_matching_method": "euclidean",
+                "interac_matching_method": "euclidean",
+                "interac_detection_method": "complex_residual_gating",
+                    
+                # 1-1 associations subconfig
+                "assoc_euclidean_features": {
+                    "dist_thresh_type": "individual",
+                    "tolerance_factor": 2.6,  # giving ideal result
+                },
+                
+                # Interractions detection subconfig
+                "interac_euclidean_features": {  
+                    "dist_thresh_type": "arbitrary",
+                    "arbitrary_dist_thresh": range(0.0, 5.0, 0.05)
+                },
+            }  
+            
+            -> valid_arbitrary_dist_thresh_intervals = {}
+"""
+        # subblobs :
+"""
+            tracking_config = {
+                "density_threshold": 0.2,
+                "assoc_matching_method": "euclidean",
+                "interac_matching_method": "euclidean",
+                "interac_detection_method": "complex_residual_gating",
+                    
+                # 1-1 associations subconfig
+                "assoc_euclidean_features": {
+                    "dist_thresh_type": "individual",
+                    "tolerance_factor": 2.6,  # giving ideal result
+                },
+                
+                # Interractions detection subconfig
+                "interac_euclidean_features": {  
+                    "dist_thresh_type": "arbitrary",
+                    "arbitrary_dist_thresh": range(0.0, 5.0, 0.05)
+                },
+            }  
+            
+            -> valid_arbitrary_dist_thresh_intervals = {[0.95, 2.3]}
+"""
+    # {euclidean, individual} -> tolerance_factor :
+        # simple_gating :
+"""
+            tracking_config = {
+                "density_threshold": 0.2,
+                "assoc_matching_method": "euclidean",
+                "interac_matching_method": "euclidean",
+                "interac_detection_method": "simple_gating",
+                    
+                # 1-1 associations subconfig
+                "assoc_euclidean_features": {
+                    "dist_thresh_type": "individual",
+                    "tolerance_factor": 2.6,  # giving ideal result
+                },
+                
+                # Interractions detection subconfig
+                "interac_euclidean_features": {  
+                    "dist_thresh_type": "individual",
+                    "tolerance_factor": range(1.0, 5.0, 0.1)
+                },
+            }  
+            
+            -> valid_tol_factor_intervals = {}
+"""
+        # complex_residual_gating :
+"""
+            tracking_config = {
+                "density_threshold": 0.2,
+                "assoc_matching_method": "euclidean",
+                "interac_matching_method": "euclidean",
+                "interac_detection_method": "complex_residual_gating",
+                    
+                # 1-1 associations subconfig
+                "assoc_euclidean_features": {
+                    "dist_thresh_type": "individual",
+                    "tolerance_factor": 2.6,  # giving ideal result
+                },
+                
+                # Interractions detection subconfig
+                "interac_euclidean_features": {  
+                    "dist_thresh_type": "individual",
+                    "tolerance_factor": range(1.0, 5.0, 0.1)
+                },
+            }  
+            
+            -> valid_tol_factor_intervals = {}
+"""
+        # subblobs :
+"""
+            tracking_config = {
+                "density_threshold": 0.2,
+                "assoc_matching_method": "euclidean",
+                "interac_matching_method": "euclidean",
+                "interac_detection_method": "subblobs",
+                    
+                # 1-1 associations subconfig
+                "assoc_euclidean_features": {
+                    "dist_thresh_type": "individual",
+                    "tolerance_factor": 2.6,  # giving valid result
+                },
+                
+                # Interractions detection subconfig
+                "interac_euclidean_features": {  
+                    "dist_thresh_type": "individual",
+                    "tolerance_factor": range(1.0, 5.0, 0.1)
+                },
+            }  
+            
+            -> valid_tol_factor_intervals = {[1.0, 2.7]}
+"""   
+    # {mahalanobis, CV} -> alpha :
+        # complex_residual_gating :
+"""
+            tracking_config = {
+                "density_threshold": 0.2,
+                "assoc_matching_method": "euclidean",
+                "interac_matching_method": "mahalanobis",
+                "interac_detection_method": "complex_residual_gating",
+                    
+                # 1-1 associations subconfig
+                "assoc_euclidean_features": {
+                    "dist_thresh_type": "individual",
+                    "tolerance_factor": 2.6,  # giving ideal result
+                },
+                
+                # Interractions detection subconfig
+                "interac_mahalanobis_features": {
+                    "kalman_features": {
+                        "features": set(),
+                        "model": "CV",
+                        "uncertainties": {
+                            "sigma_proc_pos": 1.0,
+                            "sigma_proc_vel": 4.0,
+                            "sigma_meas_pos": 0.2,
+                        }
+                    },
+                    "alpha": range(1.0, 0.0, -0.025),
+                },
+            }  
+            
+            -> valid_alpha_intervals = {[0.825, 0.25]} 
+"""
+        # subblobs :
+"""
+            tracking_config = {
+                "density_threshold": 0.2,
+                "assoc_matching_method": "euclidean",
+                "interac_matching_method": "mahalanobis",
+                "interac_detection_method": "subblobs",
+                    
+                # 1-1 associations subconfig
+                "assoc_euclidean_features": {
+                    "dist_thresh_type": "individual",
+                    "tolerance_factor": 2.6,  # giving ideal result
+                },
+                
+                # Interractions detection subconfig
+                "interac_mahalanobis_features": {
+                    "kalman_features": {
+                        "features": set(),
+                        "model": "CV",
+                        "uncertainties": {
+                            "sigma_proc_pos": 1.0,
+                            "sigma_proc_vel": 4.0,
+                            "sigma_meas_pos": 0.2,
+                        }
+                    },
+                    "alpha": range(1.0, 0.0, -0.025),
+                },
+            }  
+            
+            -> valid_alpha_intervals = {[1.0, 0.125]}
+"""
+    # {mahalanobis, CA} -> alpha :
+        # complex_residual_gating :
+"""
+            tracking_config = {
+                "density_threshold": 0.2,
+                "assoc_matching_method": "euclidean",
+                "interac_matching_method": "mahalanobis",
+                "interac_detection_method": "complex_residual_gating",
+                    
+                # 1-1 associations subconfig
+                "assoc_euclidean_features": {
+                    "dist_thresh_type": "individual",
+                    "tolerance_factor": 2.6,  # giving ideal result
+                },
+                
+                # Interractions detection subconfig
+                "interac_mahalanobis_features": {
+                    "kalman_features": {
+                        "features": set(),
+                        "model": "CA",
+                        "uncertainties": {
+                            "sigma_proc_pos": 1.0,
+                            "sigma_proc_vel": 4.0,
+                            "sigma_proc_acc": 1.5,
+                            "sigma_meas_pos": 0.2,
+                        }
+                    },
+                    "alpha": range(1.0, 0.0, -0.025),
+                },
+            }  
+            
+            -> valid_alpha_intervals = {[0.825, 0.25]}   
+"""
+        # subblobs :
+"""
+            tracking_config = {
+                "density_threshold": 0.2,
+                "assoc_matching_method": "euclidean",
+                "interac_matching_method": "mahalanobis",
+                "interac_detection_method": "subblobs",
+                    
+                # 1-1 associations subconfig
+                "assoc_euclidean_features": {
+                    "dist_thresh_type": "individual",
+                    "tolerance_factor": 2.6,  # giving ideal result
+                },
+                
+                # Interractions detection subconfig
+                "interac_mahalanobis_features": {
+                    "kalman_features": {
+                        "features": set(),
+                        "model": "CA",
+                        "uncertainties": {
+                            "sigma_proc_pos": 1.0,
+                            "sigma_proc_vel": 4.0,
+                            "sigma_proc_acc": 1.5,
+                            "sigma_meas_pos": 0.2,
+                        }
+                    },
+                    "alpha": range(1.0, 0.0, -0.025),
+                },
+            }  
+            
+            -> valid_alpha_intervals = {[1.0, 0.125]}   
+"""
